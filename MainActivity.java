@@ -27,56 +27,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.Exchanger;
 
-//
-//class MyThread implements Runnable {
-//        public CascadeClassifier facedetector;
-//        public Mat rgba;// параметр
-//        public Exchanger<MatOfRect> exchanger;
-//        public MyThread(Mat rgba, CascadeClassifier facedetector, Exchanger<MatOfRect> ex) {
-//            this.exchanger = ex;
-//            // через конструтор передадим параметр
-//            // передаём в конструктор все параметры, которые могут пигодится потоку
-//            this.facedetector=facedetector;
-//            this.rgba=rgba; // сохраняем параметры как поля - мне нужен только один =))
-//        }
-//
-//        public void run() {
-//
-//            // здесь пишем код, который будет исполняться в отдельном потоке
-//            // далее я вызываю два статических метода одного из своих классов (самописный класс)))
-//            MatOfRect faceDetections = new MatOfRect();
-//            facedetector.detectMultiScale(rgba, faceDetections);
-//            try{
-//                exchanger.exchange(faceDetections);
-//            }
-//            catch (InterruptedException ex){
-//
-//            }
-//
-//        }
-//
-//
-//}
 class buffer{
     public static MatOfRect points = new MatOfRect();
 }
 class Asc extends AsyncTask<Object, Void, Void>
 {
-
     @Override
     protected Void doInBackground(Object...objects) {
-
         CascadeClassifier FD = (CascadeClassifier)objects[0];
         Mat rgba = (Mat) objects[1];
-
         FD.detectMultiScale(rgba, buffer.points);
-
         return null;
     }
 }
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
-
     JavaCameraView javaCameraView;
     File cascFile;
     CascadeClassifier faceDetector;
@@ -90,28 +55,22 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         if(!OpenCVLoader.initDebug())
         {
             OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_11, this,baseCallBack);
-
         }
         else
         {
-
             try {
                 baseCallBack.onManagerConnected(LoaderCallbackInterface.SUCCESS);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
         javaCameraView.setCvCameraViewListener(this);
     }
-
     @Override
     public void onCameraViewStarted(int width, int height) {
     mRgba= new Mat();
     mGrey = new Mat();
-
     }
-
     @Override
     public void onCameraViewStopped() {
     mRgba.release();
@@ -122,44 +81,13 @@ int count=0;
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
         mGrey = inputFrame.gray();
-
-           new Asc().execute((Object) faceDetector, (Object) mRgba);
-            count=0;
-
-//            try{
-//                MatOfRect message = ex.exchange(null);
-//
-                for (Rect rect : buffer.points.toArray()) {
-
-                    Imgproc.rectangle(mRgba, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(255, 0, 0));
-
-                }
-//            }
-//            catch (InterruptedException ex)
-//            {
-//
-//            }
-
+        new Asc().execute((Object) faceDetector, (Object) mRgba);
+        count=0;
         for (Rect rect : buffer.points.toArray()) {
-
+                Imgproc.rectangle(mRgba, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(255, 0, 0));
+        for (Rect rect : buffer.points.toArray()) {
             Imgproc.rectangle(mRgba, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(255, 0, 0));
-
         }
-
-
-
-//            Runnable r = new MyThread(mRgba, faceDetector, ex); // создаём класс и передаём в него параметр
-//            new Thread(r).start();
-
-
-
-
-
-         // передаём объект r как параметр создаваемого потоку
-        // теперь код из run() может работать в отдельном потоке +
-        // обрабатывать переданные параметры! =)) о как)
-
-
         return mRgba;
     }
     private BaseLoaderCallback baseCallBack= new BaseLoaderCallback(this ) {
@@ -185,13 +113,11 @@ int count=0;
                     faceDetector= new CascadeClassifier(cascFile.getAbsolutePath());
                     if (faceDetector.empty())
                     {
-                        faceDetector= null;
+                        faceDetector = null;
                     }
                     else
                     {
                         cascadeDir.delete();
-
-
                     }
                     javaCameraView.enableView();
 
@@ -202,7 +128,6 @@ int count=0;
                     super.onManagerConnected(status);
                 }
                 break;
-
             }
             super.onManagerConnected(status);
         }
